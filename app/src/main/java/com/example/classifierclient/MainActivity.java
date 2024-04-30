@@ -23,42 +23,22 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import java.io.IOException;
-import android.graphics.Bitmap;
 import android.os.Environment;
 import java.io.File;
 import java.io.FileOutputStream;
-import android.content.Intent;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Toast;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.EdgeToEdge;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import android.widget.TextView;
-import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
-import androidx.annotation.NonNull;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
-import java.io.IOException;
 
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.widget.Toast;
 
-import java.io.File;
+
 import java.io.FileNotFoundException;
 
 import android.graphics.Color;
@@ -253,8 +233,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayResult(String result) {
         // Display the result in green, big letters
+        //if the result's last word is unknown, display it in red
         resultTextView.setText(result);
-        resultTextView.setTextColor(Color.GREEN);
+        String[] words = result.split(" ");
+        if (words[words.length - 1].equals("unknown")) {
+            resultTextView.setTextColor(Color.RED);
+        }
+        else {
+            resultTextView.setTextColor(Color.GREEN);
+        }
+        
         resultTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
 
         // Reset to default text after 5 seconds

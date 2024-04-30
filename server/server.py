@@ -39,7 +39,7 @@ def classify_image(image_path):
         return classification
     except Exception as e:
         print(e)
-        return 'error'
+        return 'error processing image'
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
