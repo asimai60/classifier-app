@@ -60,9 +60,13 @@ def detect_lines(image):
         # cv2.imshow('Detected Lines', result)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
-        number = len(os.listdir('server/detected lines')) + 1
+        
         PATH = 'server/detected lines'
+        if not os.path.exists(PATH):
+            os.makedirs(PATH)
+        number = len(os.listdir(PATH)) + 1
         cv2.imwrite(f'{PATH}/detected{number}.jpeg', result)
+
         return True, len(lines)
     else:
         #print("no lines detected")
@@ -148,8 +152,9 @@ def compare_ridges(PATH, im, segmented_image):
 def full_system(im):
     segmented_image, was_segmented = crop_bottom(im)
     if segmented_image is not None:
-        print(os.getcwd())
         SAVE_PATH = 'server/OCI'
+        if not os.path.exists(SAVE_PATH):
+            os.makedirs(SAVE_PATH)
         number = len(os.listdir(SAVE_PATH)) + 1
         cv2.imwrite(f'{SAVE_PATH}/cropped{number}.jpeg', segmented_image)
     if was_segmented:
