@@ -30,14 +30,25 @@ def detect_lines(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     h, w = image.shape[:2]
 
-    crop_size = 1/8  
-    x_start = int(w * crop_size)
-    x_end = int(w * (1 - crop_size))
-    y_start = int(h * crop_size)
-    y_end = int(h * (1 - crop_size))
+    
 
-    gray_cropped = gray[y_start:y_end, x_start:x_end]
-    edges = canny(gray_cropped)
+    # crop_size = 1/8  
+    # x_start = int(w * crop_size)
+    # x_end = int(w * (1 - crop_size))
+    # y_start = int(h * crop_size)
+    # y_end = int(h * (1 - crop_size))
+
+    # gray_cropped = gray[y_start:y_end, x_start:x_end]
+    edges = canny(gray)
+    mask = np.zeros_like(edges)
+    inner_circle = cv2.circle(mask, (w//2, h//2), (h//2 - h//8)+1, (255),-1)
+    edges = cv2.bitwise_and(edges, inner_circle)
+    EDGE_PATH = 'server/edges'
+    if not os.path.exists(EDGE_PATH):
+        os.makedirs(EDGE_PATH)
+    number = len(os.listdir(EDGE_PATH)) + 1
+    cv2.imwrite(f'{EDGE_PATH}/edges{number}.jpeg', edges)
+    
     edges_full = canny(gray)
 
 
@@ -60,7 +71,7 @@ def detect_lines(image):
         # cv2.imshow('Detected Lines', result)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
-        
+
         PATH = 'server/detected lines'
         if not os.path.exists(PATH):
             os.makedirs(PATH)
