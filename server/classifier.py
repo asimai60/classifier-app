@@ -4,7 +4,7 @@ import os
 import argparse
 import sys
 from circular_segmentation import crop_bottom
-from lines_detector_tom import HoughCircles
+from glass_circles_Tom import HoughCircles
 
 
 LOW_threshold = 20
