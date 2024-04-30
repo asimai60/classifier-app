@@ -1,14 +1,8 @@
 import numpy as np
 import cv2
-import os
-import matplotlib.pyplot as plt
-import time
 from scipy.signal import fftconvolve
 from scipy.ndimage import uniform_filter
-from skimage.draw import circle_perimeter
 
-plastic_path = r"C:\Users\nrhot\Downloads\WhatsApp Unknown 2024-04-24 at 12.53.26\cropped\PLAST"
-glass_path = r'C:\Users\nrhot\Downloads\WhatsApp Unknown 2024-04-24 at 12.53.26\cropped\GLASS'
 LOW_threshold = 20
 HIGH_threshold = 70
 threshold = 30
@@ -83,7 +77,16 @@ def generate_accumulator(edge_map, max_radius, bin_size=1):
     for radius in range(1, max_radius_binned):
         # Generate the mask for this radius
         mask = np.zeros_like(edge_map, dtype=float)
-        rr, cc = circle_perimeter(edge_map.shape[0]//2, edge_map.shape[1]//2, radius)
+        # rr, cc = circle_perimeter(edge_map.shape[0]//2, edge_map.shape[1]//2, radius)
+        
+
+        #for pyinstaller
+        height, width = edge_map.shape[:2]
+        image = np.zeros((height, width), dtype=np.uint8)
+        center = (width // 2, height // 2)
+        cv2.circle(image, center, radius, (255), 1, lineType=cv2.LINE_8)
+        rr, cc = np.where(image > 0)
+        ########
 
         # Ensure that the indices are within the dimensions of 'mask'
         rr = np.clip(rr, 0, mask.shape[0] - 1)
@@ -131,69 +134,4 @@ def HoughCircles(image):
 
     # Apply the mask to 'local_maxima' to filter out the unwanted row
     local_maxima = local_maxima[mask]
-    """local_maxima = cv2.HoughCircles(edge_map, cv2.HOUGH_GRADIENT, 3, minDist=20,
-                                    param1=150, param2=60, minRadius=0, maxRadius=max_radius)
-    print(local_maxima)
-    # Assuming local_maxima is a numpy array
-    mask = ~((local_maxima[:, 1] == 81) & (local_maxima[:, 2] == 81))
-
-    # Apply the mask to 'local_maxima' to filter out the unwanted rows
-    local_maxima = local_maxima[mask]"""
-
     return local_maxima
-
-
-def main(path, label):
-    files = os.listdir(path)
-    amount = 0
-    not_detected = 0
-    correct = 0
-    # Process each image
-    for image_file in files:
-        # Construct the full path to the image
-        image_path = os.path.join(path, image_file)
-        # Read the image
-        image = load_and_resize(image_path)
-        lines = detect_lines(image)
-        amount += 1
-        if not lines:
-            circls = HoughCircles(image,image_path)
-            if circls.any():
-                if label == "glass":
-                    correct = correct + 1
-                    print(image_path)
-                else:
-                    print("found_circles", image_path[70:])
-            else:
-                if label == "plastic":
-                    print("circls is good")
-                    print(image_path)
-                    correct = correct + 1
-                else:
-                    print("didnt found circles", image_path[70:])
-
-            not_detected += 1
-        else:
-            if label == "plastic":
-                correct = correct + 1
-            else:
-                print("found lines", image_path[70:])
-        time.sleep(2)
-
-    return amount, correct
-
-
-if __name__ == '__main__':
-
-    print("glass data")
-    amount_g , pglass= main(glass_path, "glass")
-
-    print("plastic data:")
-    amount_p, prate = main(plastic_path, "plastic")
-    print("prate:", prate)
-    print("pglass:", pglass)
-    amount = amount_g + amount_p
-    print("Total amount:", amount)
-    print("succses rate", (prate + pglass) / amount * 100)
-
-

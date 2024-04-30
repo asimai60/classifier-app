@@ -1,16 +1,12 @@
 import numpy as np
 import cv2
 import os
-from circular_segmentation import crop_bottom
-from lines_detector_tom import HoughCircles
 import argparse
 import sys
-from pathlib import Path
+from circular_segmentation import crop_bottom
+from lines_detector_tom import HoughCircles
 
 
-
-plastic_path = 'segmented bottoms/separation/plastic'
-glass_path = 'segmented bottoms/separation/glass'
 LOW_threshold = 20
 HIGH_threshold = 70
 threshold = 30
@@ -87,7 +83,7 @@ def crop_ridge_band(image):
     outer_circle = cv2.circle(image, (image.shape[1]//2, image.shape[0]//2), image.shape[0]//2 + 5, (0, 0, 0),10)
     return inner_circle
 
-def full_system(im, offline=False):
+def full_system(im, offline=False, skip_circle=False):
     if offline:
         im = cv2.imread(im)
     segmented_image, was_segmented = crop_bottom(im)
@@ -102,7 +98,11 @@ def full_system(im, offline=False):
         if lines and num > 0:
             # print(f"Detected {num} lines")
             return "plastic"
+        
         else:
+            if skip_circle:
+                return "glass"
+            
             circle_list = HoughCircles(segmented_image)
             if circle_list is not None:
                 for i in circle_list:
@@ -115,13 +115,8 @@ def full_system(im, offline=False):
                     os.makedirs(PATH_SAVE_CIRCLES)
                 number = len(os.listdir(PATH_SAVE_CIRCLES)) + 1
                 cv2.imwrite(f'{PATH_SAVE_CIRCLES}/circles{number}.jpeg', segmented_image)
-
                 return "glass"
-            # return "glass"
-            # score = compare_ridges(PATH, image, segmented_image)
-            # if score > 10:
-            #     return "glass"
-            # return "plastic without lines"
+            
     return "unknown"
 
 def process_directory(directory_path):
@@ -147,7 +142,6 @@ def main():
                         help="Choose 'single' (or 's') to process one image or 'directory' (or 'd') to process all JPEG images in a directory.")
     args = parser.parse_args()
 
-    # Normalize the user input to handle both full and short commands
     if args.mode in ['single', 's']:
         image_path = input("Enter the complete path to the image (JPEG): ")
         if not os.path.isfile(image_path) or not image_path.lower().endswith('.jpeg'):
