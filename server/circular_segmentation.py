@@ -2,16 +2,16 @@ import numpy as np
 import cv2
 import os
 
-def load_image(path, max_size=800):
-    image = cv2.imread(path)
-    # factor = int(np.round(max(image.shape[0], image.shape[1]) / max_size))
-    # desired_shape = (image.shape[1]//factor, image.shape[0]//factor) if factor > 1 else image.shape[:2]
-    # image = cv2.resize(image, desired_shape)
-    return image
-
 def detect_circles(image):
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    denoised_image = cv2.GaussianBlur(gray_image, (5,5), 0)
+    if image is None or not isinstance(image, np.ndarray):
+            raise ValueError("Invalid image input: Image is None or not a valid numpy array.")
+        
+    try:
+        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        denoised_image = cv2.GaussianBlur(gray_image, (5,5), 0)
+    except Exception as e:
+        raise RuntimeError("Failed during image preprocessing: " + str(e))
+
     edges = cv2.Canny(denoised_image, 20, 0)
 
     dp = 1
@@ -19,7 +19,7 @@ def detect_circles(image):
     param1 = 70
     param2 = 70
     min_radius = image.shape[0] // 8
-    max_radius = 0
+    max_radius = image.shape[0] // 2  
 
     hough_circles = cv2.HoughCircles(denoised_image, cv2.HOUGH_GRADIENT, dp, min_dist, param1=param1, param2=param2, minRadius=min_radius, maxRadius=max_radius)
     if hough_circles is None:
@@ -28,13 +28,18 @@ def detect_circles(image):
         hough_circles = cv2.HoughCircles(denoised_image, cv2.HOUGH_GRADIENT, dp, min_dist, param1=param1, param2=param2, minRadius=min_radius, maxRadius=max_radius)
     return hough_circles
 
+
 def radius_smaller_than_half(center, radius, image_shape):
-    a = center[0].astype(int) - radius.astype(int)
-    b = center[1].astype(int) - radius.astype(int)
-    c = center[0].astype(int) + radius.astype(int)
-    d = center[1].astype(int) + radius.astype(int)
+    try:
+        a = int(center[0]) - int(radius)
+        b = int(center[1]) - int(radius)
+        c = int(center[0]) + int(radius)
+        d = int(center[1]) + int(radius)
+    except Exception as e:
+        raise ValueError(f"Error in calculating dimensions: {e}")
+
     if a < 0 or b < 0 or c >= image_shape[1] or d >= image_shape[0]:
-        return False                        
+        return False
     return True
 
 
@@ -69,6 +74,9 @@ def segment_circles(image, hough_circles):
     return image, True
 
 def crop_bottom(image):
+    if image is None or not isinstance(image, np.ndarray):
+        raise ValueError("Invalid input: image must be a non-empty numpy array.")
+    
     hough_circles = detect_circles(image)
     segmented_image, was_segmented = segment_circles(image, hough_circles)
     standard_size = (480, 480)
