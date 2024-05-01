@@ -37,11 +37,13 @@ def detect_lines(image):
     h, w = image.shape[:2]
     edges = canny(gray)
     mask = np.zeros_like(edges)
+    full_edges = edges.copy()
     inner_circle = cv2.circle(mask, (w//2, h//2), (h//2 - h//8)+1, (255),-1)
+
     edges = cv2.bitwise_and(edges, inner_circle)
 
     
-    DEBUG_SAVE(edges, 'edges')
+    DEBUG_SAVE(full_edges, 'edges')
 
     lines = cv2.HoughLines(edges, RHO, THETA, LINESTH) 
     result = image.copy()
@@ -88,6 +90,11 @@ def full_system(im, offline=False, skip_circle=False):
             
             circle_list = HoughCircles(segmented_image)
             if circle_list is not None:
+                if len(circle_list) == 0:
+                    return "plastic"
+                max_r = max(circle_list, key=lambda x: x[2])[2]
+                if max_r < 1:
+                    return "plastic"
                 for i in circle_list:
                     x = i[0] * 3
                     y = i[1] * 3
