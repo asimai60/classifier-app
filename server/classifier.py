@@ -6,7 +6,7 @@ import sys
 from circular_segmentation import crop_bottom
 from glass_circles_Tom import HoughCircles
 
-
+RESULT_DIRECTORY = "image outputs"
 LOW_threshold = 20
 HIGH_threshold = 70
 threshold = 30
@@ -33,7 +33,7 @@ def detect_lines(image):
     mask = np.zeros_like(edges)
     inner_circle = cv2.circle(mask, (w//2, h//2), (h//2 - h//8)+1, (255),-1)
     edges = cv2.bitwise_and(edges, inner_circle)
-    EDGE_PATH = 'server/edges'
+    EDGE_PATH = f'{RESULT_DIRECTORY}/edges'
     if not os.path.exists(EDGE_PATH):
         os.makedirs(EDGE_PATH)
     number = len(os.listdir(EDGE_PATH)) + 1
@@ -62,7 +62,7 @@ def detect_lines(image):
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
-        PATH = 'server/detected lines'
+        PATH = f'{RESULT_DIRECTORY}/detected lines'
         if not os.path.exists(PATH):
             os.makedirs(PATH)
         number = len(os.listdir(PATH)) + 1
@@ -88,7 +88,7 @@ def full_system(im, offline=False, skip_circle=False):
         im = cv2.imread(im)
     segmented_image, was_segmented = crop_bottom(im)
     if segmented_image is not None:
-        SAVE_PATH = 'server/OCI'
+        SAVE_PATH = f'{RESULT_DIRECTORY}/OCI'
         if not os.path.exists(SAVE_PATH):
             os.makedirs(SAVE_PATH)
         number = len(os.listdir(SAVE_PATH)) + 1
@@ -110,7 +110,7 @@ def full_system(im, offline=False, skip_circle=False):
                     y = i[1] * 3
                     r = i[2] * 3
                     cv2.circle(segmented_image, (x,y), r, (0, 255, 0), 2)
-                PATH_SAVE_CIRCLES = 'server/circles'
+                PATH_SAVE_CIRCLES = f'{RESULT_DIRECTORY}/circles'
                 if not os.path.exists(PATH_SAVE_CIRCLES):
                     os.makedirs(PATH_SAVE_CIRCLES)
                 number = len(os.listdir(PATH_SAVE_CIRCLES)) + 1
