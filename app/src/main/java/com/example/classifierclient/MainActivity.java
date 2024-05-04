@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.media.MediaPlayer;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -161,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Create a file from the URI and send it to the server
         File file = convertBitmapToFile(imageBitmap);
+        String serverIP = "http://10.100.102.9:5000/upload";
 
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new MultipartBody.Builder()
@@ -169,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                         RequestBody.create(MediaType.parse("image/jpeg"), file))
                 .build();
         Request request = new Request.Builder()
-                .url("http://10.100.102.9:5000/upload")
+                .url(serverIP)
                 .post(requestBody)
                 .build();
         client.newCall(request).enqueue(new Callback() {
@@ -196,8 +199,9 @@ public class MainActivity extends AppCompatActivity {
 
                             // Display the classification result in a TextView
                             displayResult("Classification Result: " + label);
-//                            TextView resultView = findViewById(R.id.resultTextView);
-//                            resultView.setText("Classification Result: " + label);
+
+                            // Play sound corresponding to the classification
+                            playSound(label);
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Toast.makeText(MainActivity.this, "Failed to parse response", Toast.LENGTH_SHORT).show();
@@ -205,7 +209,23 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
             }
+
+
         });
+    }
+    private void playSound(String label) {
+        // Construct the resource ID for the sound file based on the label
+        int resourceId = getResources().getIdentifier(label.toLowerCase(), "raw", getPackageName());
+        if (resourceId != 0) {
+            // If the sound file exists, create and start the MediaPlayer
+            MediaPlayer mediaPlayer = MediaPlayer.create(this, resourceId);
+            mediaPlayer.start();
+            // Release the MediaPlayer resources after playback completes
+            mediaPlayer.setOnCompletionListener(MediaPlayer::release);
+        } else {
+            // Log a warning if the sound file does not exist
+            Log.w("SoundPlayback", "Sound file not found for label: " + label);
+        }
     }
 
     private File convertBitmapToFile(Bitmap bitmap) {
@@ -254,5 +274,13 @@ public class MainActivity extends AppCompatActivity {
                 resultTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18); // Set default text size
             }
         }, DELAY_MILLISECONDS);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Call finish() to close the current activity (MainActivity)
+        // This will revert back to the previous activity (SplashActivity)
+        super.onBackPressed();
+
     }
 }
