@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- activity_splash.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="@android:color/white">
+
+    <TextView
+        android:id="@+id/textViewTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ClassAid"
+        android:textSize="24sp"
+        android:textColor="@android:color/black"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="32dp"/>
+
+    <Button
+        android:id="@+id/buttonClassify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Classify"
+        android:layout_below="@id/textViewTitle"
+        android:layout_centerHorizontal="true"
+        android:paddingStart="40dp"
+        android:paddingEnd="40dp"/>
+</RelativeLayout>
