@@ -46,6 +46,7 @@ import java.io.FileNotFoundException;
 import android.graphics.Color;
 import android.os.Handler;
 import android.util.TypedValue;
+import android.graphics.BitmapFactory;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -163,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Create a file from the URI and send it to the server
         File file = convertBitmapToFile(imageBitmap);
-        String serverIP = "http://10.0.0.22:5000/upload";
+        String serverIP = "http://10.100.102.9:5000/upload";
 
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new MultipartBody.Builder()
@@ -251,6 +252,8 @@ public class MainActivity extends AppCompatActivity {
         return path;
     }
 
+    private Bitmap capturedImageBitmap; // Declare the variable outside the method
+
     private void displayResult(String result) {
         // Display the result in green, big letters
         //if the result's last word is unknown, display it in red
@@ -258,12 +261,21 @@ public class MainActivity extends AppCompatActivity {
         String[] words = result.split(" ");
         if (words[words.length - 1].equals("unknown")) {
             resultTextView.setTextColor(Color.RED);
-        }
-        else {
+        } else {
             resultTextView.setTextColor(Color.GREEN);
         }
-        
+
         resultTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+        ImageView imageView = findViewById(R.id.imageView);
+        if (result.contains("glass")) {
+            imageView.setImageResource(R.drawable.glassbin);
+        } else if (result.contains("plastic")) {
+            imageView.setImageResource(R.drawable.plasticbin);
+        } else {
+            // If the classification result is unknown or not glass/plastic, display the captured image
+            capturedImageBitmap = BitmapFactory.decodeFile(imageUri.getPath());
+            imageView.setImageBitmap(capturedImageBitmap);
+        }
 
         // Reset to default text after 5 seconds
         new Handler().postDelayed(new Runnable() {
@@ -272,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
                 resultTextView.setText(DEFAULT_TEXT);
                 resultTextView.setTextColor(Color.BLACK); // Set default text color
                 resultTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18); // Set default text size
+                imageView.setImageBitmap(capturedImageBitmap);
             }
         }, DELAY_MILLISECONDS);
     }
