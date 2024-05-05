@@ -104,6 +104,8 @@ def full_system(im, offline=False, skip_circle=False):
                 DEBUG_SAVE(segmented_image, 'detected circles')
 
                 return "glass"
+            else:
+                return "plastic"
             
     return "unknown"
 
