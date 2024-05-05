@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Create a file from the URI and send it to the server
         File file = convertBitmapToFile(imageBitmap);
-        String serverIP = "http://10.100.102.9:5000/upload";
+        String serverIP = "http://10.0.0.22:5000/upload";
 
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new MultipartBody.Builder()
